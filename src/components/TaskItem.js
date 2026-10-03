@@ -1,8 +1,10 @@
 import React, { useCallback, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ReanimatedSwipeable, { SwipeDirection } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useTheme } from '../theme/ThemeContext';
+import { priorityColors } from '../theme/palette';
 import { daysBetween, formatDateShort, isOverdue, todayISO } from '../utils/date';
 import PriorityBadge from './PriorityBadge';
 import StatusBadge, { CategoryPill, OverdueBadge } from './Badges';
@@ -13,22 +15,22 @@ function CheckCircle({ checked, onPress, disabled }) {
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
-      hitSlop={10}
+      hitSlop={12}
       accessibilityRole="checkbox"
       accessibilityState={{ checked, disabled }}
       accessibilityLabel={checked ? 'Mark as pending' : 'Mark as completed'}
-      style={({ pressed }) => [styles.checkbox, { opacity: pressed && !disabled ? 0.7 : 1 }]}
+      style={({ pressed }) => [styles.checkbox, { opacity: pressed && !disabled ? 0.75 : 1 }]}
     >
       <View
         style={[
           styles.checkboxInner,
           {
             borderColor: checked ? colors.success : colors.border,
-            backgroundColor: checked ? colors.success : 'transparent',
+            backgroundColor: checked ? colors.success : colors.surfaceAlt,
           },
         ]}
       >
-        {checked && <Text style={styles.checkmark}>✓</Text>}
+        {checked && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
       </View>
     </Pressable>
   );
@@ -39,17 +41,19 @@ function SwipeAction({ label, icon, color, onPress }) {
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.swipeAction, { backgroundColor: color, opacity: pressed ? 0.8 : 1 }]}
+      style={({ pressed }) => [styles.swipeAction, { backgroundColor: color, opacity: pressed ? 0.85 : 1 }]}
     >
-      <Text style={styles.swipeIcon}>{icon}</Text>
+      <Ionicons name={icon} size={20} color="#FFFFFF" />
       <Text style={styles.swipeLabel}>{label}</Text>
     </Pressable>
   );
 }
 
-function TaskCard({ task, onPress, onToggle, onDelete, overdue }) {
-  const { colors } = useTheme();
+function TaskCard({ task, onPress, onToggle, overdue }) {
+  const { colors, isDark } = useTheme();
   const completed = task.status === 'completed';
+  const priorityMap = priorityColors[task.priority] || priorityColors.medium;
+  const accentColor = colors[priorityMap.fg] || colors.primary;
 
   return (
     <Pressable
@@ -61,7 +65,11 @@ function TaskCard({ task, onPress, onToggle, onDelete, overdue }) {
         {
           backgroundColor: colors.surface,
           borderColor: overdue ? colors.danger : colors.border,
-          opacity: pressed ? 0.9 : 1,
+          borderLeftColor: overdue ? colors.danger : accentColor,
+          borderLeftWidth: 4.5,
+          shadowColor: colors.shadow,
+          shadowOpacity: isDark ? 0.3 : 0.04,
+          opacity: pressed ? 0.92 : completed ? 0.75 : 1,
           transform: [{ scale: pressed ? 0.995 : 1 }],
         },
       ]}
@@ -71,7 +79,13 @@ function TaskCard({ task, onPress, onToggle, onDelete, overdue }) {
       <View style={styles.cardBody}>
         <Text
           numberOfLines={2}
-          style={[styles.title, { color: completed ? colors.textFaint : colors.text, textDecorationLine: completed ? 'line-through' : 'none' }]}
+          style={[
+            styles.title,
+            {
+              color: completed ? colors.textFaint : colors.text,
+              textDecorationLine: completed ? 'line-through' : 'none',
+            },
+          ]}
         >
           {task.title || 'Untitled task'}
         </Text>
@@ -80,16 +94,19 @@ function TaskCard({ task, onPress, onToggle, onDelete, overdue }) {
           <CategoryPill category={task.category} size="small" />
           <PriorityBadge priority={task.priority} size="small" />
           <StatusBadge status={task.status} size="small" />
-          {overdue && <OverdueBadge days={overdue} />}
+          {overdue > 0 ? <OverdueBadge days={overdue} /> : null}
         </View>
 
         <View style={styles.dateRow}>
+          <Ionicons name="calendar-outline" size={12} color={colors.textFaint} />
           <Text style={[styles.dateText, { color: colors.textFaint }]}>
             {`${formatDateShort(task.startDate)} → ${formatDateShort(task.dueDate)}`}
           </Text>
-          {!completed && !!task.dueDate && !overdue && task.dueDate === todayISO() && (
-            <Text style={[styles.dueHint, { color: colors.primary }]}>Due today</Text>
-          )}
+          {!completed && Boolean(task.dueDate) && overdue === 0 && task.dueDate === todayISO() ? (
+            <View style={[styles.duePill, { backgroundColor: colors.primarySoft }]}>
+              <Text style={[styles.dueHint, { color: colors.primary }]}>Due today</Text>
+            </View>
+          ) : null}
         </View>
       </View>
     </Pressable>
@@ -120,12 +137,12 @@ export default function TaskItem({ task, onPress, onToggle, onDelete }) {
     () => (
       <View style={styles.actionsRow}>
         <SwipeAction
-          label={task.status === 'completed' ? 'Reopen' : 'Complete'}
-          icon={task.status === 'completed' ? '↺' : '✓'}
+          label={task.status === 'completed' ? 'Reopen' : 'Done'}
+          icon={task.status === 'completed' ? 'arrow-undo' : 'checkmark-done'}
           color={task.status === 'completed' ? colors.info : colors.success}
           onPress={handleToggle}
         />
-        <SwipeAction label="Delete" icon="🗑" color={colors.danger} onPress={handleDelete} />
+        <SwipeAction label="Delete" icon="trash-outline" color={colors.danger} onPress={handleDelete} />
       </View>
     ),
     [colors, handleDelete, handleToggle, task.status]
@@ -159,19 +176,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
-    padding: 14,
-    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 18,
     borderWidth: 1,
-    marginBottom: 10,
+    marginBottom: 11,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardBody: {
     flex: 1,
     gap: 8,
   },
   title: {
-    fontSize: 15,
+    fontSize: 15.5,
     fontWeight: '700',
-    lineHeight: 21,
+    lineHeight: 22,
+    letterSpacing: -0.2,
   },
   metaRow: {
     flexDirection: 'row',
@@ -181,51 +203,51 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    marginTop: 2,
   },
   dateText: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
   },
+  duePill: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 4,
+  },
   dueHint: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
   },
   checkbox: {
-    paddingTop: 2,
+    paddingTop: 1,
   },
   checkboxInner: {
-    width: 22,
-    height: 22,
+    width: 23,
+    height: 23,
     borderRadius: 7,
-    borderWidth: 2,
+    borderWidth: 1.8,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  checkmark: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-    lineHeight: 15,
   },
   actionsRow: {
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 11,
+    gap: 6,
+    paddingLeft: 6,
   },
   swipeAction: {
-    width: 78,
-    borderRadius: 14,
+    width: 76,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-  },
-  swipeIcon: {
-    fontSize: 18,
-    color: '#FFFFFF',
   },
   swipeLabel: {
     fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 });

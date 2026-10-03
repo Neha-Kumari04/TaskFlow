@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
@@ -18,7 +18,9 @@ function DetailRow({ icon, label, value, valueColor, children }) {
   return (
     <View style={styles.row}>
       <View style={styles.rowLabel}>
-        <Ionicons name={icon} size={15} color={colors.textFaint} />
+        <View style={[styles.detailIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+          <Ionicons name={icon} size={15} color={colors.textMuted} />
+        </View>
         <Text style={[styles.rowLabelText, { color: colors.textMuted }]}>{label}</Text>
       </View>
       {children || <Text style={[styles.rowValue, { color: valueColor || colors.text }]}>{value}</Text>}
@@ -32,9 +34,9 @@ function ProgressSteps({ startDate, dueDate, status }) {
 
   const steps = useMemo(() => {
     const list = [];
-    if (startDate) list.push({ label: 'Start', date: startDate, done: today >= startDate });
+    if (startDate) list.push({ label: 'Start date', date: startDate, done: today >= startDate });
     if (dueDate) {
-      list.push({ label: 'Due', date: dueDate, done: status === 'completed' || today > dueDate });
+      list.push({ label: 'Due date', date: dueDate, done: status === 'completed' || today > dueDate });
     }
     if (status === 'completed') {
       list.push({ label: 'Completed', date: today, done: true });
@@ -49,9 +51,24 @@ function ProgressSteps({ startDate, dueDate, status }) {
       {steps.map((step, index) => (
         <View key={`${step.label}-${index}`} style={styles.timelineRow}>
           <View style={styles.timelineRail}>
-            <View style={[styles.timelineDot, { backgroundColor: step.done ? colors.success : colors.border }]} />
+            <View
+              style={[
+                styles.timelineDot,
+                {
+                  backgroundColor: step.done ? colors.success : colors.surfaceAlt,
+                  borderColor: step.done ? colors.success : colors.border,
+                },
+              ]}
+            >
+              {step.done && <Ionicons name="checkmark" size={9} color="#FFFFFF" />}
+            </View>
             {index < steps.length - 1 && (
-              <View style={[styles.timelineLine, { backgroundColor: step.done ? colors.success : colors.border }]} />
+              <View
+                style={[
+                  styles.timelineLine,
+                  { backgroundColor: step.done ? colors.successSoft : colors.border },
+                ]}
+              />
             )}
           </View>
           <View style={styles.timelineBody}>
@@ -116,9 +133,9 @@ export default function TaskDetailScreen({ navigation, route }) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {!!justCreated && (
-        <View style={[styles.successBanner, { backgroundColor: colors.successSoft }]}>
-          <Ionicons name="checkmark-circle" size={17} color={colors.success} />
+      {Boolean(justCreated) && (
+        <View style={[styles.successBanner, { backgroundColor: colors.successSoft, borderColor: colors.success }]}>
+          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
           <Text style={[styles.successText, { color: colors.success }]}>Task created successfully</Text>
         </View>
       )}
@@ -128,7 +145,7 @@ export default function TaskDetailScreen({ navigation, route }) {
           <View style={styles.badges}>
             <StatusBadge status={task.status} />
             <PriorityBadge priority={task.priority} />
-            {overdue && <OverdueBadge days={overdueDays} />}
+            {overdue && overdueDays > 0 ? <OverdueBadge days={overdueDays} /> : null}
           </View>
           <Pressable
             onPress={() => navigation.navigate('TaskForm', { id: task.id })}
@@ -139,7 +156,7 @@ export default function TaskDetailScreen({ navigation, route }) {
               { backgroundColor: colors.surfaceAlt, borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
             ]}
           >
-            <Ionicons name="create-outline" size={16} color={colors.text} />
+            <Ionicons name="create-outline" size={15} color={colors.text} />
             <Text style={[styles.editText, { color: colors.text }]}>Edit</Text>
           </Pressable>
         </View>
@@ -162,26 +179,39 @@ export default function TaskDetailScreen({ navigation, route }) {
 
       <View style={styles.quickStats}>
         <Card style={styles.quickStat}>
+          <View style={styles.quickStatHeader}>
+            <Text style={[styles.quickStatLabel, { color: colors.textMuted }]}>
+              {completed ? 'STATUS' : 'TIME REMAINING'}
+            </Text>
+            <Ionicons
+              name={completed ? 'checkmark-circle' : 'time-outline'}
+              size={15}
+              color={completed ? colors.success : colors.primary}
+            />
+          </View>
           <Text style={[styles.quickStatValue, { color: completed ? colors.success : colors.text }]}>
-            {completed ? '100%' : daysLeft === null ? '—' : daysLeft < 0 ? `${Math.abs(daysLeft)}d late` : `${daysLeft}d left`}
-          </Text>
-          <Text style={[styles.quickStatLabel, { color: colors.textMuted }]}>
-            {completed ? 'Completed' : 'Time remaining'}
+            {completed ? 'Completed' : daysLeft === null ? '—' : daysLeft < 0 ? `${Math.abs(daysLeft)}d late` : `${daysLeft}d left`}
           </Text>
         </Card>
         <Card style={styles.quickStat}>
+          <View style={styles.quickStatHeader}>
+            <Text style={[styles.quickStatLabel, { color: colors.textMuted }]}>DURATION</Text>
+            <Ionicons name="calendar-outline" size={15} color={colors.textMuted} />
+          </View>
           <Text style={[styles.quickStatValue, { color: colors.text }]}>
-            {totalDays === null ? '—' : `${totalDays + 1}d`}
+            {totalDays === null ? '—' : `${totalDays + 1} day${totalDays === 0 ? '' : 's'}`}
           </Text>
-          <Text style={[styles.quickStatLabel, { color: colors.textMuted }]}>Duration</Text>
         </Card>
       </View>
 
       <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Schedule</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Ionicons name="calendar" size={17} color={colors.primary} />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Schedule</Text>
+        </View>
         <DetailRow icon="play-circle-outline" label="Start date" value={formatDate(task.startDate)} />
         <DetailRow icon="flag-outline" label="Due date" value={formatDate(task.dueDate)} valueColor={overdue ? colors.danger : undefined} />
-        {!!task.completedAt && (
+        {Boolean(task.completedAt) && (
           <DetailRow
             icon="checkmark-done-outline"
             label="Completed on"
@@ -193,7 +223,10 @@ export default function TaskDetailScreen({ navigation, route }) {
       </Card>
 
       <Card style={styles.card}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Details</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Ionicons name="information-circle" size={17} color={colors.primary} />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Details</Text>
+        </View>
         <DetailRow icon="pricetag-outline" label="Category" value={task.category || '—'} />
         <DetailRow icon="flag-outline" label="Priority" value={task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} />
         <DetailRow icon="ellipse-outline" label="Status" value={completed ? 'Completed' : 'Pending'} />
@@ -207,13 +240,23 @@ export default function TaskDetailScreen({ navigation, route }) {
       <View style={styles.actions}>
         <Button
           title={completed ? 'Mark as pending' : 'Mark as completed'}
-          icon={completed ? '↺' : '✓'}
+          icon={<Ionicons name={completed ? 'arrow-undo-outline' : 'checkmark-circle-outline'} size={18} color="#FFFFFF" />}
           variant={completed ? 'secondary' : 'primary'}
           size="large"
           onPress={() => toggleTaskStatus(task.id)}
         />
-        <Button title="Edit task" icon="✎" variant="secondary" onPress={() => navigation.navigate('TaskForm', { id: task.id })} />
-        <Button title="Delete task" icon="🗑" variant="danger" onPress={confirmDelete} />
+        <Button
+          title="Edit task"
+          icon={<Ionicons name="create-outline" size={17} color={colors.text} />}
+          variant="secondary"
+          onPress={() => navigation.navigate('TaskForm', { id: task.id })}
+        />
+        <Button
+          title="Delete task"
+          icon={<Ionicons name="trash-outline" size={17} color="#FFFFFF" />}
+          variant="danger"
+          onPress={confirmDelete}
+        />
       </View>
       {dialog}
     </ScrollView>
@@ -233,11 +276,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 9,
-    padding: 12,
+    padding: 13,
     borderRadius: 14,
+    borderWidth: 1,
   },
   successText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '700',
   },
   heroCard: {
@@ -258,20 +302,20 @@ const styles = StyleSheet.create({
   editButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 13,
-    paddingVertical: 8,
-    borderRadius: 11,
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
     borderWidth: 1,
   },
   editText: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   title: {
     fontSize: 22,
     fontWeight: '800',
-    lineHeight: 29,
+    lineHeight: 28,
     letterSpacing: -0.4,
   },
   categoryRow: {
@@ -293,23 +337,36 @@ const styles = StyleSheet.create({
   },
   quickStat: {
     flex: 1,
-    gap: 3,
+    gap: 4,
+  },
+  quickStatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   quickStatValue: {
     fontSize: 19,
     fontWeight: '800',
+    letterSpacing: -0.3,
   },
   quickStatLabel: {
-    fontSize: 11.5,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.4,
   },
   card: {
-    gap: 13,
+    gap: 14,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: '800',
-    marginBottom: 2,
+    letterSpacing: -0.2,
   },
   row: {
     flexDirection: 'row',
@@ -320,8 +377,15 @@ const styles = StyleSheet.create({
   rowLabel: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 9,
     flex: 1,
+  },
+  detailIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowLabelText: {
     fontSize: 13,
@@ -334,7 +398,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   timeline: {
-    marginTop: 6,
+    marginTop: 8,
+    paddingTop: 4,
     gap: 0,
   },
   timelineRow: {
@@ -343,31 +408,36 @@ const styles = StyleSheet.create({
   },
   timelineRail: {
     alignItems: 'center',
-    width: 14,
+    width: 16,
   },
   timelineDot: {
-    width: 11,
-    height: 11,
-    borderRadius: 6,
-    marginTop: 3,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginTop: 2,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   timelineLine: {
     width: 2,
     flex: 1,
-    minHeight: 26,
+    minHeight: 28,
     marginVertical: 2,
+    borderRadius: 1,
   },
   timelineBody: {
     flex: 1,
     paddingBottom: 14,
   },
   timelineLabel: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '700',
   },
   timelineDate: {
     fontSize: 12,
     fontWeight: '600',
+    marginTop: 1,
   },
   actions: {
     gap: 10,

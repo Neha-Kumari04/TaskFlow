@@ -1,306 +1,143 @@
 # TaskFlow
 
-A local-first task manager built with **React Native + Expo** in plain **JavaScript**.
-Everything is stored on the device — there is no backend, no account and no network call.
+TaskFlow is a mobile task management application developed with React Native and Expo. It allows users to create, organize, filter, and track tasks locally on their device, with support for CSV bulk imports and offline persistence.
 
 ---
 
-## Table of contents
+## Prerequisites
 
-- [Features](#features)
-- [Tech stack](#tech-stack)
-- [Getting started](#getting-started)
-- [Running the app](#running-the-app)
-- [CSV import format](#csv-import-format)
-- [How the app is organised](#how-the-app-is-organised)
-- [Data storage](#data-storage)
-- [Validation rules](#validation-rules)
-- [Verification](#verification)
-- [Known limitations](#known-limitations)
+- **Node.js**: v20 or higher
+- **Package Manager**: npm or yarn
+- **Runtime**:
+  - Physical device with the **Expo Go** app (iOS / Android), or
+  - iOS Simulator (via Xcode on macOS), or
+  - Android Emulator (via Android Studio)
 
 ---
 
-## Features
+## Setup & Installation
 
-### Dashboard
-- Gradient hero card with **overall progress** (`completed / total`) and a completion bar.
-- Four tappable stat cards: **Total**, **Pending**, **Completed** and **Today's**; tapping one opens the task list pre-filtered.
-- **Today's tasks** list, an overdue call-out, and a **Coming up next** section for the next 7 days.
-- **Quick actions** for bulk upload and adding a task, plus a floating **+** button.
-- Empty state with a call to action when nothing is scheduled.
+1. Navigate to the project root:
+   ```bash
+   cd TaskFlow
+   ```
 
-### Task list
-- Live **search** across title, description and category.
-- **Status** tabs with live counts (All / Pending / Completed).
-- Collapsible **advanced filters**: priority (Low/Medium/High), due date (Any / Today / Next 7 days / Overdue / No due date) and category.
-- **Sort** sheet with eight options: due date and start date (earliest / latest), priority (high / low first), title A–Z and recently created.
-- **Swipe a task** left-to-right for quick **Complete / Reopen** and **Delete** actions.
-- Sort summary, active-filter count and a one-tap **Clear filters**.
-- Distinct empty states for "no tasks yet" versus "no matching tasks".
-
-### Add / Edit task
-- Title (required, max 120) and description (max 500) with live character counters.
-- **Priority** and **Status** option pickers, **category** picker with suggestions and a custom-category fallback.
-- **Start date** and **due date** via a native date picker, plus quick-set chips (Today, Tomorrow, In 3 days, In 1 week).
-- Inline validation: title and category are required, and the due date cannot precede the start date.
-- On edit, the card shows whether the task was created manually or imported from CSV, and when it was last updated.
-
-### Task details
-- Full-screen detail view with description, category, priority, status and schedule.
-- **Duration** (in days) and a visual **Schedule** timeline.
-- **Mark as complete / Reopen** toggle, **Edit**, and **Delete** behind a confirmation dialog.
-- Friendly "task not found" state if the task was removed elsewhere.
-
-### Bulk upload (CSV)
-- Picks a `.csv` from the device with the **native document picker** — nothing is bundled or hard-coded.
-- Live analysis before saving: total rows, valid rows, issue count, detected delimiter and column count, and whether a header row was found.
-- **Tabs for Valid / Invalid / Duplicates** with an expandable per-row preview.
-- Row-level validation messages, e.g. `Title is required`, `Priority "Urgent" must be Low, Medium or High`, `Due date cannot be earlier than the start date`, `Status "maybe" is not recognised`.
-- Import is behind a confirmation dialog and reports how many rows were **imported / skipped as duplicates / skipped as invalid**.
-- Re-importing the same file imports nothing, so running the demo twice is safe.
-
-### Settings
-- **Light / Dark / System** theme switch, persisted across restarts.
-- Live counters for Total, Pending, Completed and Overdue.
-- **Export tasks to CSV** through the native share sheet, using the same column order the importer accepts.
-- **Clear all tasks** behind a two-step confirmation.
-- CSV format reference, "where is my data stored" explainer and a **Reset to an empty state** helper for testing the import flow.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
 ---
 
-## Tech stack
+## Running the App
 
-| Concern | Choice |
-| --- | --- |
-| Framework | Expo SDK 57 / React Native 0.86 (New Architecture) |
-| Language | JavaScript (ES modules, no TypeScript) |
-| Navigation | React Navigation 7 — native stack + bottom tabs |
-| State | React Context + `useReducer` |
-| Persistence | `@react-native-async-storage/async-storage` |
-| CSV parsing | `papaparse` |
-| File access | `expo-document-picker`, `expo-file-system`, `expo-sharing` |
-| Gestures / animation | `react-native-gesture-handler`, `react-native-reanimated` |
-| Theming | Custom `ThemeContext` with light/dark palettes |
-
----
-
-## Getting started
-
-**Requirements:** Node.js 20+, npm, and the **Expo Go** app on a physical device
-(iOS / Android) or a simulator.
+Start the Expo development server:
 
 ```bash
-cd TaskFlow
-npm install
+npm start
 ```
 
----
+From the terminal interface, you can select your preferred target:
+- Press `i` to open in the **iOS Simulator**
+- Press `a` to open in the **Android Emulator**
+- Press `w` to open in a **Web Browser**
+- Scan the printed **QR Code** using your phone camera (iOS) or the **Expo Go** app (Android)
 
-## Running the app
+### Direct Platform Commands
 
 ```bash
-npm start          # dev server, then press i / a, or scan the QR code
-npm run ios        # iOS simulator
-npm run android    # Android emulator or device
-npm run web        # browser (react-native-web)
+npm run ios        # Launch directly on iOS Simulator
+npm run android    # Launch directly on Android Emulator
+npm run web        # Launch directly in web browser
 ```
 
-Other useful scripts:
+---
+
+## Screens and Capabilities
+
+### 1. Home / Dashboard
+- Displays key task metrics: Total, Completed, Pending, and Today's tasks.
+- Visual completion rate progress bar.
+- Dedicated sections for today's deadlines, upcoming tasks (next 7 days), and overdue notices.
+- Floating Action Button (+) for quick task creation and shortcut to bulk upload.
+
+### 2. Task List
+- Real-time search across task title, description, and category.
+- Status filters: All, Pending, and Completed.
+- Multi-criteria filter options for Priority (Low / Medium / High), Due Dates, and Categories.
+- Sort sheet supporting Due Date, Start Date, Priority, and Created Date.
+- Direct checkbox toggle to mark tasks complete and swipe gesture for deletion.
+
+### 3. Add / Edit Task
+- Comprehensive form: Title (required), Description, Category (required), Priority, Start Date, Due Date, and Status.
+- Schedule validation preventing due date from being earlier than start date.
+- Quick-select date chips for common due dates (Today, Tomorrow, 3 Days, 1 Week).
+
+### 4. Task Details
+- Full task view showing all fields, category tags, and duration calculation.
+- Interactive schedule timeline tracking start date, due date, and completion date.
+- Actions to toggle status (complete/pending), edit task, or delete with confirmation dialog.
+
+### 5. Bulk Upload (CSV)
+- Native file picker to import `.csv` files directly from the device.
+- Pre-import validation engine verifying column mappings, mandatory fields, date logic, and accepted values.
+- Duplicate detection comparing IDs as well as matching Title + Start Date + Due Date combinations.
+- Detailed import summary categorizing rows into Valid, Duplicate, and Invalid with actionable error messages.
+- Safe execution ensuring only valid, non-duplicate tasks are written to local storage.
+
+### 6. Settings
+- Theme toggle supporting Light and Dark modes (persisted locally).
+- High-level task inventory breakdown.
+- Export tasks to CSV functionality using native sharing.
+- App data reset helpers for clean testing cycles.
+
+---
+
+## Testing Bulk Upload (CSV)
+
+A sample CSV file containing 50 records is included with the project at:
+`csv/tasks.csv`
+
+### Expected CSV Structure
+The parser supports comma and semicolon delimiters, and accepts files with or without a header row:
+
+| Column | Required | Accepted Values |
+| --- | --- | --- |
+| `id` | Optional | Identifier used for duplicate detection |
+| `title` | **Required** | 1 to 120 characters |
+| `description` | Optional | Up to 500 characters |
+| `category` | **Required** | e.g. Work, Personal, Fitness, Study |
+| `priority` | **Required** | `Low`, `Medium`, `High` (case-insensitive) |
+| `start_date` | Optional | `YYYY-MM-DD` |
+| `due_date` | Optional | `YYYY-MM-DD` (must be $\ge$ start date) |
+| `status` | Optional | `Pending` or `Completed` (defaults to `Pending`) |
+
+### Steps to Test:
+1. Open the application and go to **Bulk Upload** (accessible from Dashboard or Tasks tab).
+2. Tap **Choose CSV file** and select `csv/tasks.csv`.
+3. Inspect the validation report (Valid, Duplicates, Invalid tabs).
+4. Tap **Import tasks** to commit valid records to the database.
+
+---
+
+## Tech Stack
+
+- **Core**: React Native 0.86, Expo SDK 57 (New Architecture enabled)
+- **Language**: JavaScript (ES6+)
+- **Navigation**: React Navigation (Bottom Tabs + Native Stack)
+- **Local Storage**: `@react-native-async-storage/async-storage`
+- **CSV Engine**: PapaParse
+- **Icons**: `@expo/vector-icons` (Ionicons)
+- **Gestures**: `react-native-gesture-handler`, `react-native-reanimated`
+
+---
+
+## Project Health
 
 ```bash
-npm run doctor     # expo-doctor project health checks
-npm run prebuild   # generate the native ios/ and android/ projects
-npm run build:android   # EAS preview build (APK)
+# Run Expo Doctor diagnostics
+npm run doctor
+
+# Verify web build bundle
+npm run web
 ```
-
-### Building an APK
-
-```bash
-npm install -g eas-cli
-eas login
-npm run build:android
-```
-
-The EAS build needs an `eas.json`; create one with `eas build:configure` if it is
-missing, then run the command above and install the resulting `.apk` on a device.
-
----
-
-## CSV import format
-
-Column order is flexible and the header row is **optional** — rows are matched by
-position when no header is present.
-
-| # | Column | Required | Accepted values |
-| --- | --- | --- | --- |
-| 1 | `id` | no | Any string. Used for duplicate detection. |
-| 2 | `title` | **yes** | 1–120 characters |
-| 3 | `description` | no | Up to 500 characters |
-| 4 | `category` | **yes** | `Work`, `Development`, `Planning`, `Meetings`, `Personal`, `Health`, `Finance`, `Learning`, `Other`, or any custom value (stored as typed) |
-| 5 | `priority` | **yes** | `Low`, `Medium`, `High` (case-insensitive) |
-| 6 | `start_date` | no | `YYYY-MM-DD` |
-| 7 | `due_date` | no | `YYYY-MM-DD`, must not be earlier than `start_date` |
-| 8 | `status` | no | `Pending`, `Completed` (case-insensitive); defaults to `Pending`, or `Completed` when the due date is in the past |
-
-Header names are matched case-insensitively and separators are ignored, so
-`start_date`, `startDate` and `Start Date` all work. Comma and semicolon
-delimiters are auto-detected.
-
-A ready-to-import sample with 50 rows lives at [`csv/tasks.csv`](csv/tasks.csv):
-
-```csv
-id,title,description,category,priority,start_date,due_date,status
-1,Prepare project proposal,Prepare the initial project proposal document,Work,High,2026-09-28,2026-10-01,pending
-2,Team standup,Attend the daily development team standup,Work,Medium,2026-09-30,2026-09-30,completed
-```
-
-On device: **Tasks → cloud icon** (or **Dashboard → Bulk upload**) → *Choose CSV file*
-→ pick `tasks.csv` → *Import 50 tasks*.
-
-### Duplicate handling
-
-A row is skipped when either:
-
-- its `id` matches an existing task's `id` (or another row earlier in the same file), or
-- its **title + start date + due date** combination already exists.
-
-Duplicates are reported in the *Duplicates* tab and counted in the import summary —
-they are never written to storage, so importing the same file twice is a no-op.
-
----
-
-## How the app is organised
-
-```
-TaskFlow/
-├── App.js                     # providers, gesture root, navigation theme
-├── index.js                   # Expo entry (registerRootComponent)
-├── app.json                   # Expo / native configuration
-├── assets/                    # icons and splash image
-├── csv/
-│   └── tasks.csv              # 50-row sample file for the bulk upload flow
-└── src/
-    ├── components/            # reusable UI (buttons, form fields, task row, dialogs…)
-    │   ├── Badges.js
-    │   ├── Button.js
-    │   ├── ConfirmDialog.js
-    │   ├── EmptyState.js
-    │   ├── ErrorState.js
-    │   ├── Fab.js
-    │   ├── FilterChip.js
-    │   ├── Form.js
-    │   ├── Layout.js
-    │   ├── LoadingState.js
-    │   ├── PriorityBadge.js
-    │   ├── SearchBar.js
-    │   ├── SegmentedControl.js
-    │   ├── StatCard.js
-    │   └── TaskItem.js
-    ├── context/
-    │   └── TaskContext.js     # tasks state, CRUD, stats, persistence
-    ├── data/
-    │   ├── csvService.js      # parse, validate, de-duplicate, serialise
-    │   ├── fileService.js     # native picker / read / share
-    │   └── taskStorage.js     # AsyncStorage CRUD + normalisation
-    ├── hooks/
-    │   ├── useConfirmDialog.js
-    │   └── useTaskFilters.js  # search + filter + sort pipeline
-    ├── navigation/
-    │   └── RootNavigator.js   # stack + bottom tabs
-    ├── screens/
-    │   ├── HomeScreen.js
-    │   ├── TaskListScreen.js
-    │   ├── TaskFormScreen.js
-    │   ├── TaskDetailScreen.js
-    │   ├── BulkUploadScreen.js
-    │   └── SettingsScreen.js
-    ├── theme/
-    │   ├── ThemeContext.js    # light/dark/system, persisted
-    │   └── palette.js
-    └── utils/
-        ├── constants.js       # priorities, statuses, categories, sort options
-        └── date.js            # parsing, formatting, overdue maths
-```
-
-### Navigation
-
-```
-RootStack
-├── MainTabs
-│   ├── Home      (Dashboard)
-│   ├── Tasks     (Task list)
-│   └── Settings
-├── TaskDetail   (card)
-├── TaskForm     (modal on iOS, card on Android)
-└── BulkUpload   (card)
-```
-
-### Notable implementation choices
-
-- **`ConfirmDialog` instead of `Alert.alert`.** `Alert.alert` is a no-op on
-  `react-native-web`, so destructive actions would silently do nothing in a browser.
-  TaskFlow ships its own `Modal`-based dialog that behaves identically on iOS, Android
-  and web.
-- **Merged task updates.** `TaskContext.updateTask` merges a patch into the existing
-  task instead of replacing it, so a status-only update can no longer wipe the rest of
-  the task.
-- **Platform-aware file reading.** `expo-file-system` is native-only, so
-  `fileService` reads the picked file through `fetch` on web and `File.text()` on
-  device; export falls back to a browser download.
-- **Boolean-safe conditionals.** Conditional JSX guards use `!!value && …` so an
-  empty string from a CSV cell can never render as a stray text node.
-
----
-
-## Data storage
-
-- Tasks and the theme preference are persisted with **AsyncStorage**
-  (keys `@taskflow/tasks`, `@taskflow/tasks_version` and `@taskflow/theme_mode`).
-- Writes are debounced so rapid edits do not thrash storage.
-- Everything stays on the device — no analytics, no network requests, no sync.
-- **Settings → Clear all tasks** (two-step confirmation) empties the list;
-  **Settings → Reset to an empty state** also restores the light theme, which is handy
-  when re-running the CSV import demo.
-
----
-
-## Validation rules
-
-Applied consistently to manual entry and to every imported row:
-
-| Field | Rule |
-| --- | --- |
-| `title` | Required, trimmed, 1–120 characters |
-| `category` | Required |
-| `priority` | One of `Low`, `Medium`, `High` |
-| `status` | One of `Pending`, `Completed` |
-| `start_date` / `due_date` | `YYYY-MM-DD` |
-| `due_date` ≥ `start_date` | Enforced |
-
-Invalid CSV rows are listed with the exact reason and are never written to storage.
-
----
-
-## Verification
-
-- `npx expo-doctor` — **21/21 checks pass**.
-- `npx expo export --platform ios --platform android` — both bundles build cleanly.
-- The app was exercised end-to-end in a headless browser through `react-native-web`
-  (70 automated checks, 0 runtime errors) covering: the dashboard empty state, form
-  validation, save → detail routing, status toggling, editing, search, every filter
-  group, sorting, delete-with-confirmation, importing all 50 CSV rows, duplicate
-  re-import, invalid-row reporting, empty-file handling, dashboard stats after import,
-  theme switching and persistence, two-step clear-all, and the post-clear empty states.
-- Verified in the iOS simulator with no runtime errors.
-
----
-
-## Known limitations
-
-- CSV import relies on the native document picker, so a physical device or simulator is
-  needed to pick a real file. The web build reads the file through `fetch` and exports
-  via a browser download.
-- Export uses the native share sheet on device; there is no cloud destination.
-- No undo for a deleted task — deletion is confirmed first, but not reversible.
-- Categories are free-form: the nine suggestions are offered, yet any custom value is
-  accepted and stored as typed.

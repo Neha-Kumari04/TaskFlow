@@ -18,18 +18,20 @@ export default function Button({
   const isDisabled = disabled || loading;
 
   const palette = {
-    primary: { bg: colors.primary, fg: colors.primaryText, border: 'transparent' },
-    secondary: { bg: colors.surfaceAlt, fg: colors.text, border: colors.border },
-    danger: { bg: colors.danger, fg: '#FFFFFF', border: 'transparent' },
-    outline: { bg: 'transparent', fg: colors.primary, border: colors.primary },
-    ghost: { bg: 'transparent', fg: colors.textMuted, border: 'transparent' },
+    primary: { bg: colors.primary, fg: colors.primaryText, border: 'transparent', shadow: colors.primary },
+    secondary: { bg: colors.surfaceAlt, fg: colors.text, border: colors.border, shadow: 'transparent' },
+    danger: { bg: colors.danger, fg: '#FFFFFF', border: 'transparent', shadow: colors.danger },
+    outline: { bg: 'transparent', fg: colors.primary, border: colors.primary, shadow: 'transparent' },
+    ghost: { bg: 'transparent', fg: colors.textMuted, border: 'transparent', shadow: 'transparent' },
   }[variant];
 
   const sizing = {
-    small: { paddingVertical: 8, paddingHorizontal: 14, fontSize: 13, radius: 10 },
-    medium: { paddingVertical: 13, paddingHorizontal: 20, fontSize: 15, radius: 12 },
-    large: { paddingVertical: 16, paddingHorizontal: 24, fontSize: 16, radius: 14 },
+    small: { paddingVertical: 9, paddingHorizontal: 14, fontSize: 13, radius: 11 },
+    medium: { paddingVertical: 13, paddingHorizontal: 20, fontSize: 15, radius: 13 },
+    large: { paddingVertical: 15, paddingHorizontal: 24, fontSize: 16, radius: 15 },
   }[size];
+
+  const hasElevation = !isDisabled && (variant === 'primary' || variant === 'danger');
 
   return (
     <Pressable
@@ -46,7 +48,13 @@ export default function Button({
           paddingVertical: sizing.paddingVertical,
           paddingHorizontal: sizing.paddingHorizontal,
           alignSelf: fullWidth ? 'stretch' : 'flex-start',
-          opacity: isDisabled ? 0.5 : pressed ? 0.85 : 1,
+          opacity: isDisabled ? 0.5 : pressed ? 0.88 : 1,
+          transform: [{ scale: pressed && !isDisabled ? 0.98 : 1 }],
+          shadowColor: palette.shadow,
+          shadowOpacity: hasElevation ? 0.28 : 0,
+          shadowRadius: hasElevation ? 8 : 0,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: hasElevation ? 3 : 0,
         },
         style,
       ]}
@@ -55,7 +63,13 @@ export default function Button({
         <ActivityIndicator size="small" color={palette.fg} />
       ) : (
         <View style={styles.content}>
-          {!!icon && <Text style={[styles.icon, { color: palette.fg }]}>{icon}</Text>}
+          {!!icon && (
+            typeof icon === 'string' ? (
+              <Text style={[styles.icon, { color: palette.fg }]}>{icon}</Text>
+            ) : (
+              icon
+            )
+          )}
           <Text style={[styles.text, { color: palette.fg, fontSize: sizing.fontSize }]}>{title}</Text>
         </View>
       )}
@@ -72,10 +86,12 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
   text: {
     fontWeight: '700',
+    letterSpacing: -0.2,
   },
   icon: {
     fontSize: 15,

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import HomeScreen from '../screens/HomeScreen';
 import TaskListScreen from '../screens/TaskListScreen';
@@ -22,12 +22,17 @@ const TAB_ICONS = {
 };
 
 function TabBarIcon({ routeName, focused, color }) {
+  const { colors } = useTheme();
   const [active, inactive] = TAB_ICONS[routeName] || ['ellipse', 'ellipse-outline'];
-  return <Ionicons name={focused ? active : inactive} size={22} color={color} />;
+  return (
+    <View style={[styles.tabIconWrap, focused && { backgroundColor: colors.primarySoft }]}>
+      <Ionicons name={focused ? active : inactive} size={21} color={color} />
+    </View>
+  );
 }
 
 function MainTabs() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
     <Tab.Navigator
@@ -39,13 +44,19 @@ function MainTabs() {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           borderTopWidth: StyleSheet.hairlineWidth,
-          height: Platform.OS === 'ios' ? 86 : 62,
+          height: Platform.OS === 'ios' ? 88 : 66,
           paddingTop: 6,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          shadowColor: colors.shadow,
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: isDark ? 0.25 : 0.05,
+          shadowRadius: 10,
+          elevation: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 11.5,
           fontWeight: '700',
+          letterSpacing: 0.2,
         },
         tabBarIcon: ({ focused, color }) => (
           <TabBarIcon routeName={route.name} focused={focused} color={color} />
@@ -80,15 +91,17 @@ export default function RootNavigator() {
           title: 'Task details',
           headerBackTitle: 'Back',
           headerRight: () => (
-            <Text
+            <Pressable
               onPress={() => {
                 const id = route.params?.id;
                 if (id) navigation.navigate('TaskForm', { id });
               }}
-              style={[styles.headerAction, { color: colors.primary }]}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Edit task"
             >
-              Edit
-            </Text>
+              <Text style={[styles.headerAction, { color: colors.primary }]}>Edit</Text>
+            </Pressable>
           ),
         })}
       />
@@ -99,12 +112,14 @@ export default function RootNavigator() {
           title: route.params?.id ? 'Edit task' : 'Add task',
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           headerRight: () => (
-            <Text
+            <Pressable
               onPress={() => navigation.goBack()}
-              style={[styles.headerAction, { color: colors.textMuted }]}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
-              Cancel
-            </Text>
+              <Text style={[styles.headerAction, { color: colors.textMuted }]}>Cancel</Text>
+            </Pressable>
           ),
         })}
       />
@@ -122,5 +137,13 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
     fontWeight: '700',
     paddingHorizontal: 4,
+  },
+  tabIconWrap: {
+    paddingHorizontal: 14,
+    paddingVertical: 3,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
   },
 });

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import Button from '../components/Button';
 import { Card, SectionHeader } from '../components/Layout';
 import { tasksToCsv } from '../data/csvService';
 import { FileServiceError, shareCsvFile } from '../data/fileService';
@@ -21,7 +20,7 @@ function SettingRow({ icon, iconColorKey, label, description, right, onPress, da
       </View>
       <View style={styles.rowBody}>
         <Text style={[styles.rowLabel, { color: danger ? colors.danger : colors.text }]}>{label}</Text>
-        {!!description && <Text style={[styles.rowDescription, { color: colors.textMuted }]}>{description}</Text>}
+        {Boolean(description) && <Text style={[styles.rowDescription, { color: colors.textMuted }]}>{description}</Text>}
       </View>
       {right}
     </View>
@@ -117,6 +116,13 @@ export default function SettingsScreen({ navigation }) {
     });
   };
 
+  const dataMetrics = [
+    { label: 'Total', value: stats.total, color: colors.primary },
+    { label: 'Pending', value: stats.pending, color: colors.info },
+    { label: 'Completed', value: stats.completed, color: colors.success },
+    { label: 'Overdue', value: stats.overdue, color: colors.danger },
+  ];
+
   return (
     <ScrollView
       style={[styles.root, { backgroundColor: colors.background }]}
@@ -151,6 +157,11 @@ export default function SettingsScreen({ navigation }) {
                     backgroundColor: active ? colors.primarySoft : colors.surfaceAlt,
                     borderColor: active ? colors.primary : colors.border,
                     opacity: pressed ? 0.88 : 1,
+                    shadowColor: active ? colors.primary : 'transparent',
+                    shadowOpacity: active ? 0.18 : 0,
+                    shadowRadius: 8,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: active ? 2 : 0,
                   },
                 ]}
               >
@@ -186,14 +197,12 @@ export default function SettingsScreen({ navigation }) {
       <SectionHeader title="Data" style={styles.sectionSpacing} />
       <Card style={styles.card}>
         <View style={styles.dataGrid}>
-          {[
-            { label: 'Total', value: stats.total },
-            { label: 'Pending', value: stats.pending },
-            { label: 'Completed', value: stats.completed },
-            { label: 'Overdue', value: stats.overdue },
-          ].map((item) => (
-            <View key={item.label} style={[styles.dataCell, { backgroundColor: colors.surfaceAlt }]}>
-              <Text style={[styles.dataValue, { color: colors.text }]}>{item.value}</Text>
+          {dataMetrics.map((item) => (
+            <View
+              key={item.label}
+              style={[styles.dataCell, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}
+            >
+              <Text style={[styles.dataValue, { color: item.color }]}>{item.value}</Text>
               <Text style={[styles.dataLabel, { color: colors.textMuted }]}>{item.label}</Text>
             </View>
           ))}
@@ -366,14 +375,16 @@ const styles = StyleSheet.create({
   },
   themeOption: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    paddingVertical: 16,
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1,
   },
   themeLabel: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '700',
   },
   dataGrid: {
@@ -385,17 +396,21 @@ const styles = StyleSheet.create({
     width: '47%',
     flexGrow: 1,
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
     paddingVertical: 14,
     borderRadius: 14,
+    borderWidth: 1,
   },
   dataValue: {
-    fontSize: 21,
+    fontSize: 22,
     fontWeight: '800',
+    letterSpacing: -0.3,
   },
   dataLabel: {
-    fontSize: 11.5,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
   csvText: {
     fontSize: 12.5,

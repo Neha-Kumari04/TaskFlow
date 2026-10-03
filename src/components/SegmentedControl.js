@@ -18,13 +18,22 @@ export default function SegmentedControl({ options, value, onChange, style }) {
             accessibilityState={{ selected: active }}
             style={({ pressed }) => [
               styles.segment,
-              active && { backgroundColor: colors.surface },
-              active && styles.segmentActiveShadow,
+              active && {
+                backgroundColor: colors.surface,
+                shadowColor: colors.shadow,
+                shadowOpacity: 0.12,
+                shadowRadius: 5,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 2,
+              },
               { opacity: pressed ? 0.85 : 1 },
             ]}
           >
             <Text
-              style={[styles.segmentText, { color: active ? colors.text : colors.textMuted }]}
+              style={[
+                styles.segmentText,
+                { color: active ? colors.text : colors.textMuted, fontWeight: active ? '700' : '600' },
+              ]}
               numberOfLines={1}
             >
               {option.label}
@@ -57,12 +66,23 @@ export function SegmentedScroll({ options, value, onChange }) {
               accessibilityState={{ selected: active }}
               style={({ pressed }) => [
                 styles.segment,
-                active && { backgroundColor: colors.surface },
-                active && styles.segmentActiveShadow,
+                active && {
+                  backgroundColor: colors.surface,
+                  shadowColor: colors.shadow,
+                  shadowOpacity: 0.12,
+                  shadowRadius: 5,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 2,
+                },
                 { opacity: pressed ? 0.85 : 1 },
               ]}
             >
-              <Text style={[styles.segmentText, { color: active ? colors.text : colors.textMuted }]}>
+              <Text
+                style={[
+                  styles.segmentText,
+                  { color: active ? colors.text : colors.textMuted, fontWeight: active ? '700' : '600' },
+                ]}
+              >
                 {option.label}
               </Text>
             </Pressable>
@@ -76,8 +96,8 @@ export function SegmentedScroll({ options, value, onChange }) {
 const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
-    borderRadius: 12,
-    padding: 4,
+    borderRadius: 14,
+    padding: 3,
     borderWidth: 1,
   },
   scrollContent: {
@@ -87,19 +107,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderRadius: 9,
-  },
-  segmentActiveShadow: {
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 11,
   },
   segmentText: {
     fontSize: 13,
-    fontWeight: '700',
+    letterSpacing: -0.1,
   },
 });

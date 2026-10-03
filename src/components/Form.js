@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useTheme } from '../theme/ThemeContext';
 
-export function FormField({ label, value, onChangeText, error, required, multiline, placeholder, keyboardType, autoCapitalize, style, maxLength, editable = true }) {
+export function FormField({
+  label,
+  value,
+  onChangeText,
+  error,
+  required,
+  multiline,
+  placeholder,
+  keyboardType,
+  autoCapitalize,
+  style,
+  maxLength,
+  editable = true,
+}) {
   const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
 
@@ -40,8 +54,9 @@ export function FormField({ label, value, onChangeText, error, required, multili
           styles.input,
           multiline && styles.multiline,
           {
-            backgroundColor: editable ? colors.surface : colors.surfaceAlt,
+            backgroundColor: !editable ? colors.surfaceAlt : focused ? colors.surface : colors.surface,
             borderColor,
+            borderWidth: focused ? 1.5 : 1,
             color: colors.text,
             textAlignVertical: multiline ? 'top' : 'center',
           },
@@ -75,14 +90,26 @@ export function DateField({ label, value, error, onPress, onClear, required, dis
             },
           ]}
         >
-          <Text style={styles.dateIcon}>📅</Text>
+          <View style={[styles.dateIconWrap, { backgroundColor: value ? colors.primarySoft : colors.surfaceAlt }]}>
+            <Ionicons
+              name="calendar-outline"
+              size={16}
+              color={value ? colors.primary : colors.textMuted}
+            />
+          </View>
           <Text style={[styles.dateText, { color: value ? colors.text : colors.textFaint }]}>
             {value || 'Select date'}
           </Text>
         </Pressable>
         {!!value && !disabled && (
-          <Pressable onPress={onClear} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Clear ${label}`}>
-            <Text style={[styles.clear, { color: colors.textFaint }]}>✕</Text>
+          <Pressable
+            onPress={onClear}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={`Clear ${label}`}
+            style={styles.clearBtn}
+          >
+            <Ionicons name="close-circle" size={20} color={colors.textFaint} />
           </Pressable>
         )}
       </View>
@@ -113,10 +140,15 @@ export function OptionPicker({ label, options, value, onChange, error, columns =
               style={({ pressed }) => [
                 styles.option,
                 {
-                  flexBasis: `${100 / columns}%`,
-                  backgroundColor: active ? accent : colors.surface,
+                  flexBasis: `${100 / columns - 2}%`,
+                  backgroundColor: active ? accent : colors.surfaceAlt,
                   borderColor: active ? accent : colors.border,
                   opacity: pressed ? 0.85 : 1,
+                  shadowColor: active ? accent : 'transparent',
+                  shadowOpacity: active ? 0.25 : 0,
+                  shadowRadius: 6,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: active ? 2 : 0,
                 },
               ]}
             >
@@ -147,9 +179,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   counter: {
@@ -157,20 +189,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
     fontSize: 15,
-    minHeight: 48,
+    minHeight: 50,
   },
   multiline: {
-    minHeight: 108,
-    paddingTop: 12,
+    minHeight: 110,
+    paddingTop: 14,
   },
   error: {
     fontSize: 12,
     fontWeight: '600',
+    marginTop: 2,
   },
   dateRow: {
     flexDirection: 'row',
@@ -181,23 +213,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 14,
-    minHeight: 48,
+    minHeight: 50,
   },
-  dateIcon: {
-    fontSize: 15,
+  dateIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dateText: {
     fontSize: 14.5,
     fontWeight: '600',
   },
-  clear: {
-    fontSize: 15,
-    fontWeight: '700',
-    paddingHorizontal: 4,
+  clearBtn: {
+    padding: 4,
   },
   optionGrid: {
     flexDirection: 'row',
@@ -209,11 +243,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    borderRadius: 13,
     borderWidth: 1,
   },
   optionText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '700',
   },
 });

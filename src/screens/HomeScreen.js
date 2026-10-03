@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { Card, ScreenHeader, SectionHeader } from '../components/Layout';
@@ -15,24 +15,24 @@ import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { PRIORITY_WEIGHT } from '../utils/constants';
 import { daysBetween, formatDate, isTodayTask, todayISO } from '../utils/date';
 
-function ProgressBar({ rate, colors }) {
+function ProgressBar({ rate }) {
   return (
     <View style={styles.progressWrap}>
-      <View style={[styles.progressTrack, { backgroundColor: colors.surfaceAlt }]}>
+      <View style={styles.progressTrack}>
         <LinearGradient
-          colors={[colors.primary, colors.success]}
+          colors={['#34D399', '#10B981']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={[styles.progressFill, { width: `${Math.max(rate, rate > 0 ? 4 : 0)}%` }]}
+          style={[styles.progressFill, { width: `${Math.max(rate, rate > 0 ? 5 : 0)}%` }]}
         />
       </View>
-      <Text style={[styles.progressLabel, { color: colors.textMuted }]}>{rate}% complete</Text>
+      <Text style={styles.progressLabel}>{rate}% complete</Text>
     </View>
   );
 }
 
 function QuickAction({ icon, label, description, onPress, color }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
     <Pressable
@@ -40,11 +40,18 @@ function QuickAction({ icon, label, description, onPress, color }) {
       accessibilityRole="button"
       style={({ pressed }) => [
         styles.quickAction,
-        { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.88 : 1 },
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          shadowColor: colors.shadow,
+          shadowOpacity: isDark ? 0.2 : 0.03,
+          opacity: pressed ? 0.88 : 1,
+          transform: [{ scale: pressed ? 0.985 : 1 }],
+        },
       ]}
     >
-      <View style={[styles.quickIcon, { backgroundColor: colors[color] || colors.primarySoft }]}>
-        <Ionicons name={icon} size={20} color={colors[color === 'primarySoft' ? 'primary' : color] || colors.primary} />
+      <View style={[styles.quickIcon, { backgroundColor: colors[color] || colors.primary }]}>
+        <Ionicons name={icon} size={20} color="#FFFFFF" />
       </View>
       <View style={styles.quickText}>
         <Text style={[styles.quickLabel, { color: colors.text }]}>{label}</Text>
@@ -97,6 +104,13 @@ export default function HomeScreen({ navigation }) {
 
   const goToTasks = (filter) => navigation.navigate('Tasks', { statusFilter: filter });
 
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
   if (isLoading) {
     return <LoadingState label="Preparing your dashboard…" />;
   }
@@ -109,7 +123,7 @@ export default function HomeScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
       >
         <ScreenHeader
-          title="Dashboard"
+          title={greeting}
           subtitle={`${formatDate(todayISO())} · You have ${stats.pending} pending task${stats.pending === 1 ? '' : 's'}`}
           right={
             <Pressable
@@ -128,21 +142,26 @@ export default function HomeScreen({ navigation }) {
 
         <Card style={styles.heroCard} padded={false}>
           <LinearGradient
-            colors={colors.mode === 'dark' ? ['#1E2742', '#242B4D'] : ['#4F46E5', '#7C6CF5']}
+            colors={colors.mode === 'dark' ? ['#151C34', '#202B50', '#2E3A6B'] : ['#3730A3', '#4F46E5', '#6366F1']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
           >
-            <Text style={styles.heroEyebrow}>Overall progress</Text>
+            <View style={styles.heroHeader}>
+              <Text style={styles.heroEyebrow}>Overall progress</Text>
+              <View style={styles.ratePill}>
+                <Text style={styles.ratePillText}>{stats.completionRate}%</Text>
+              </View>
+            </View>
             <Text style={styles.heroValue}>
               {stats.completed}
               <Text style={styles.heroTotal}>{` / ${stats.total}`}</Text>
             </Text>
             <Text style={styles.heroLabel}>tasks completed</Text>
             <ProgressBar rate={stats.completionRate} colors={colors} />
-            {stats.overdue > 0 && (
+            {Boolean(stats.overdue > 0) && (
               <View style={styles.heroAlert}>
-                <Ionicons name="alert-circle" size={14} color="#FFFFFF" />
+                <Ionicons name="alert-circle" size={14} color="#FCA5A5" />
                 <Text style={styles.heroAlertText}>
                   {`${stats.overdue} overdue task${stats.overdue === 1 ? '' : 's'} need attention`}
                 </Text>
@@ -305,10 +324,28 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     overflow: 'hidden',
+    borderRadius: 22,
   },
   heroGradient: {
-    padding: 20,
+    padding: 22,
     gap: 2,
+  },
+  heroHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  ratePill: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  ratePillText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '800',
   },
   heroEyebrow: {
     color: 'rgba(255,255,255,0.78)',
@@ -319,13 +356,13 @@ const styles = StyleSheet.create({
   },
   heroValue: {
     color: '#FFFFFF',
-    fontSize: 40,
+    fontSize: 42,
     fontWeight: '800',
     letterSpacing: -1,
-    marginTop: 6,
+    marginTop: 2,
   },
   heroTotal: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     opacity: 0.75,
   },
@@ -338,11 +375,13 @@ const styles = StyleSheet.create({
   heroAlert: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
     marginTop: 14,
-    backgroundColor: 'rgba(0,0,0,0.22)',
+    backgroundColor: 'rgba(239,68,68,0.25)',
+    borderColor: 'rgba(239,68,68,0.4)',
+    borderWidth: 1,
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
+    paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: 999,
   },
@@ -352,12 +391,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   progressWrap: {
-    gap: 6,
+    gap: 7,
   },
   progressTrack: {
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.22)',
   },
   progressFill: {
     height: '100%',
@@ -366,6 +406,7 @@ const styles = StyleSheet.create({
   progressLabel: {
     fontSize: 11.5,
     fontWeight: '700',
+    color: 'rgba(255,255,255,0.85)',
   },
   statGrid: {
     flexDirection: 'row',

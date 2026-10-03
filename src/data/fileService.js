@@ -33,10 +33,7 @@ export function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-/**
- * `expo-file-system` is native-only, so the browser reads the picked blob URL
- * through `fetch` instead. TaskFlow targets iOS/Android but stays testable on web.
- */
+// Read file contents with web fallback
 async function readTextFile(uri) {
   if (Platform.OS === 'web') {
     const response = await fetch(uri);

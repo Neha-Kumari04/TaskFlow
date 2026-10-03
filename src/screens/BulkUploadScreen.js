@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
@@ -63,7 +63,7 @@ function PreviewRow({ item }) {
       accessibilityLabel={`Preview row ${item.rowNumber}`}
       style={({ pressed }) => [
         styles.previewRow,
-        { borderColor: colors.border, opacity: pressed ? 0.85 : 1 },
+        { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.85 : 1 },
       ]}
     >
       <View style={styles.previewMain}>
@@ -158,36 +158,42 @@ export default function BulkUploadScreen({ navigation }) {
     confirm({
       title: 'Import tasks',
       message: `${analysis.valid.length} task${analysis.valid.length === 1 ? '' : 's'} will be added to your list. Duplicates and invalid rows will be skipped.`,
-      confirmLabel: 'Import',
+      confirmLabel: 'Import now',
       cancelLabel: 'Cancel',
-      onConfirm: () => {
+      onConfirm: async () => {
         setIsImporting(true);
-        const added = importTasks(analysis.valid.map((item) => item.task));
-        setResult({
-          imported: added,
-          skippedDuplicates: analysis.duplicates.length,
-          skippedInvalid: analysis.invalid.length,
-          totalRows: analysis.totalRows,
-          fileName: file?.name,
-        });
-        setIsImporting(false);
-        if (added > 0) {
-          setTab('valid');
+        try {
+          const importResult = await importTasks(
+            analysis.valid.map((item) => item.task),
+            {
+              source: 'csv',
+              fileName: file?.name || 'tasks.csv',
+              skippedDuplicates: analysis.duplicates.length,
+              skippedInvalid: analysis.invalid.length,
+            }
+          );
+          setResult({
+            ...importResult,
+            fileName: file?.name || 'tasks.csv',
+            totalRows: analysis.totalRows,
+          });
+        } finally {
+          setIsImporting(false);
         }
       },
     });
   };
 
-  const hasIssues = analysis && (analysis.invalid.length > 0 || analysis.duplicates.length > 0);
-
   const tabs = useMemo(() => {
     if (!analysis) return [];
     return [
       { key: 'valid', label: `Valid (${analysis.valid.length})`, colorKey: 'success' },
-      { key: 'invalid', label: `Invalid (${analysis.invalid.length})`, colorKey: 'danger' },
       { key: 'duplicates', label: `Duplicates (${analysis.duplicates.length})`, colorKey: 'warning' },
-    ].filter((item) => !(item.key === 'invalid' && analysis.invalid.length === 0) && !(item.key === 'duplicates' && analysis.duplicates.length === 0));
+      { key: 'invalid', label: `Invalid (${analysis.invalid.length})`, colorKey: 'danger' },
+    ];
   }, [analysis]);
+
+  const hasIssues = Boolean(analysis && (analysis.duplicates.length > 0 || analysis.invalid.length > 0));
 
   if (result) {
     const failed = result.skippedDuplicates + result.skippedInvalid;
@@ -199,7 +205,11 @@ export default function BulkUploadScreen({ navigation }) {
       >
         <View style={styles.centered}>
           <View style={[styles.resultIcon, { backgroundColor: result.imported > 0 ? colors.successSoft : colors.dangerSoft }]}>
-            <Text style={styles.resultIconText}>{result.imported > 0 ? '✅' : '⚠️'}</Text>
+            <Ionicons
+              name={result.imported > 0 ? 'checkmark-circle' : 'alert-circle'}
+              size={42}
+              color={result.imported > 0 ? colors.success : colors.danger}
+            />
           </View>
           <Text style={[styles.resultTitle, { color: colors.text }]}>
             {result.imported > 0 ? 'Import complete' : 'Nothing was imported'}
@@ -238,8 +248,18 @@ export default function BulkUploadScreen({ navigation }) {
         </Card>
 
         <View style={styles.actions}>
-          <Button title="View all tasks" icon="📋" size="large" onPress={() => navigation.navigate('MainTabs', { screen: 'Tasks' })} />
-          <Button title="Import another file" icon="⇪" variant="secondary" onPress={reset} />
+          <Button
+            title="View all tasks"
+            icon={<Ionicons name="list" size={17} color="#FFFFFF" />}
+            size="large"
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Tasks' })}
+          />
+          <Button
+            title="Import another file"
+            icon={<Ionicons name="cloud-upload-outline" size={17} color={colors.text} />}
+            variant="secondary"
+            onPress={reset}
+          />
           <Button title="Back to upload" variant="ghost" onPress={() => setResult(null)} />
         </View>
       </ScrollView>
@@ -254,7 +274,7 @@ export default function BulkUploadScreen({ navigation }) {
     >
       <Card style={styles.dropCard}>
         <View style={[styles.uploadIcon, { backgroundColor: colors.primarySoft }]}>
-          <Ionicons name="cloud-upload-outline" size={30} color={colors.primary} />
+          <Ionicons name="cloud-upload-outline" size={32} color={colors.primary} />
         </View>
         <Text style={[styles.dropTitle, { color: colors.text }]}>Bulk upload tasks</Text>
         <Text style={[styles.dropText, { color: colors.textMuted }]}>
@@ -264,13 +284,13 @@ export default function BulkUploadScreen({ navigation }) {
 
         <Button
           title={isReading ? 'Reading file…' : file ? 'Choose a different file' : 'Choose CSV file'}
-          icon="📄"
+          icon={<Ionicons name="document-text-outline" size={17} color="#FFFFFF" />}
           size="large"
           loading={isReading}
           onPress={handlePick}
         />
 
-        {!!file && (
+        {Boolean(file) && (
           <View style={[styles.fileCard, { backgroundColor: colors.surfaceAlt, borderColor: colors.border }]}>
             <View style={[styles.fileIcon, { backgroundColor: colors.infoSoft }]}>
               <Ionicons name="document-text" size={18} color={colors.info} />
@@ -292,7 +312,7 @@ export default function BulkUploadScreen({ navigation }) {
         )}
       </Card>
 
-      {!!loadError && (
+      {Boolean(loadError) && (
         <View style={[styles.errorBanner, { backgroundColor: colors.dangerSoft, borderColor: colors.danger }]}>
           <Ionicons name="alert-circle" size={18} color={colors.danger} />
           <Text style={[styles.errorText, { color: colors.danger }]}>{loadError}</Text>
@@ -301,7 +321,10 @@ export default function BulkUploadScreen({ navigation }) {
 
       {!file && !loadError && (
         <Card style={styles.schemaCard}>
-          <Text style={[styles.schemaTitle, { color: colors.text }]}>Expected CSV format</Text>
+          <View style={styles.schemaHeaderRow}>
+            <Ionicons name="grid-outline" size={16} color={colors.primary} />
+            <Text style={[styles.schemaTitle, { color: colors.text }]}>Expected CSV format</Text>
+          </View>
           <Text style={[styles.schemaHint, { color: colors.textMuted }]}>
             Column order is flexible and a header row is optional. Column names are matched case-insensitively, so{' '}
             <Text style={styles.mono}>start_date</Text>, <Text style={styles.mono}>startDate</Text> and{' '}
@@ -322,7 +345,7 @@ export default function BulkUploadScreen({ navigation }) {
         </Card>
       )}
 
-      {!!analysis && (
+      {Boolean(analysis) && (
         <>
           <Card style={styles.card}>
             <View style={styles.resultStats}>
@@ -364,6 +387,11 @@ export default function BulkUploadScreen({ navigation }) {
                         backgroundColor: active ? colors[item.colorKey] : colors.surface,
                         borderColor: active ? colors[item.colorKey] : colors.border,
                         opacity: pressed ? 0.85 : 1,
+                        shadowColor: active ? colors[item.colorKey] : 'transparent',
+                        shadowOpacity: active ? 0.2 : 0,
+                        shadowRadius: 5,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: active ? 2 : 0,
                       },
                     ]}
                   >
@@ -385,8 +413,8 @@ export default function BulkUploadScreen({ navigation }) {
                 <Card>
                   <EmptyState
                     icon="🚫"
-                    title="No valid rows"
-                    message="Every row in this file has an issue, so there is nothing to import."
+                    title="No valid records"
+                    message="All rows in this file have issues and cannot be imported."
                   />
                 </Card>
               ) : (
@@ -396,7 +424,7 @@ export default function BulkUploadScreen({ navigation }) {
             {tab === 'invalid' &&
               (analysis.invalid.length === 0 ? (
                 <Card>
-                  <EmptyState icon="✅" title="No invalid rows" message="Every row passed validation." />
+                  <EmptyState icon="✅" title="No invalid records" message="All rows passed validation successfully." />
                 </Card>
               ) : (
                 analysis.invalid.map((item) => (
@@ -413,7 +441,7 @@ export default function BulkUploadScreen({ navigation }) {
             {tab === 'duplicates' &&
               (analysis.duplicates.length === 0 ? (
                 <Card>
-                  <EmptyState icon="🎉" title="No duplicates" message="No row matched an existing task." />
+                  <EmptyState icon="🎉" title="No duplicate records" message="No rows matched existing tasks." />
                 </Card>
               ) : (
                 analysis.duplicates.map((item) => (
@@ -437,7 +465,7 @@ export default function BulkUploadScreen({ navigation }) {
           <View style={styles.actions}>
             <Button
               title={`Import ${analysis.valid.length} task${analysis.valid.length === 1 ? '' : 's'}`}
-              icon="⇪"
+              icon={<Ionicons name="cloud-upload-outline" size={18} color="#FFFFFF" />}
               size="large"
               disabled={analysis.valid.length === 0}
               loading={isImporting}
@@ -450,16 +478,16 @@ export default function BulkUploadScreen({ navigation }) {
         </>
       )}
 
-      <SectionHeader title="How imports work" style={styles.howHeader} />
+      <SectionHeader title="Import Guidelines" style={styles.howHeader} />
       <Card style={styles.howCard}>
         {[
-          'Duplicate ids, or rows with the same title, start date and due date, are skipped.',
-          'Rows are checked against the tasks already saved on this device.',
-          'Only valid rows are written to local storage — invalid rows never reach your task list.',
-          'Importing the same file twice will not create duplicates.',
+          'Duplicate IDs or matching title + start date + due date entries are skipped automatically.',
+          'Rows are checked against existing tasks saved on this device.',
+          'Only valid, issue-free records are saved to storage.',
+          'Re-importing the same CSV will safely ignore duplicates.',
         ].map((line) => (
           <View key={line} style={styles.howRow}>
-            <Ionicons name="ellipse" size={7} color={colors.primary} style={styles.howDot} />
+            <Ionicons name="checkmark-circle" size={15} color={colors.primary} style={styles.howDot} />
             <Text style={[styles.howText, { color: colors.textMuted }]}>{line}</Text>
           </View>
         ))}
@@ -484,38 +512,41 @@ const styles = StyleSheet.create({
   dropCard: {
     alignItems: 'center',
     gap: 12,
+    paddingVertical: 24,
   },
   uploadIcon: {
-    width: 64,
-    height: 64,
+    width: 66,
+    height: 66,
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
   dropTitle: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.3,
   },
   dropText: {
     fontSize: 13.5,
     lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   fileCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 11,
-    padding: 12,
+    padding: 13,
     borderRadius: 14,
     borderWidth: 1,
     width: '100%',
+    marginTop: 4,
   },
   fileIcon: {
     width: 38,
     height: 38,
-    borderRadius: 12,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -559,7 +590,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   schemaCard: {
-    gap: 11,
+    gap: 12,
+  },
+  schemaHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
   },
   schemaTitle: {
     fontSize: 15,
@@ -708,7 +744,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   howCard: {
-    gap: 9,
+    gap: 10,
   },
   howRow: {
     flexDirection: 'row',
@@ -716,7 +752,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   howDot: {
-    marginTop: 6,
+    marginTop: 2,
   },
   howText: {
     flex: 1,
@@ -735,9 +771,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-  },
-  resultIconText: {
-    fontSize: 34,
   },
   resultTitle: {
     fontSize: 20,

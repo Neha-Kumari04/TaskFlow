@@ -8,18 +8,26 @@ export default function EmptyState({ icon = '🗂️', title, message, actionLab
 
   return (
     <View style={styles.container}>
-      <View style={[styles.iconWrap, { backgroundColor: colors.primarySoft }]}>
-        <Text style={styles.icon}>{icon}</Text>
+      <View style={[styles.iconWrap, { backgroundColor: colors.primarySoft, borderColor: colors.border }]}>
+        {typeof icon === 'string' ? (
+          <Text style={styles.icon}>{icon}</Text>
+        ) : (
+          icon
+        )}
       </View>
       <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-      {!!message && <Text style={[styles.message, { color: colors.textMuted }]}>{message}</Text>}
-      {!!actionLabel && (
+      {Boolean(message) && <Text style={[styles.message, { color: colors.textMuted }]}>{message}</Text>}
+      {Boolean(actionLabel) && (
         <Pressable
           onPress={onAction}
           accessibilityRole="button"
           style={({ pressed }) => [
             styles.action,
-            { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
+            {
+              backgroundColor: colors.primary,
+              shadowColor: colors.primary,
+              opacity: pressed ? 0.88 : 1,
+            },
           ]}
         >
           <Text style={[styles.actionText, { color: colors.primaryText }]}>{actionLabel}</Text>
@@ -38,20 +46,22 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   iconWrap: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
   },
   icon: {
-    fontSize: 34,
+    fontSize: 32,
   },
   title: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     textAlign: 'center',
+    letterSpacing: -0.3,
   },
   message: {
     fontSize: 14,
@@ -62,10 +72,15 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingHorizontal: 22,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 14,
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   actionText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '700',
+    letterSpacing: -0.2,
   },
 });

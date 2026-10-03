@@ -13,10 +13,10 @@ export default function PriorityBadge({ priority, size = 'medium', showLabel = t
   const small = size === 'small';
 
   return (
-    <View style={[styles.badge, { backgroundColor: bg, paddingVertical: small ? 3 : 5, paddingHorizontal: small ? 8 : 10 }]}>
-      <View style={[styles.dot, { backgroundColor: fg }]} />
+    <View style={[styles.badge, { backgroundColor: bg, paddingVertical: small ? 3.5 : 5, paddingHorizontal: small ? 8 : 10 }]}>
+      <Text style={[styles.icon, { color: fg, fontSize: small ? 10 : 12 }]}>{map.icon || '•'}</Text>
       {showLabel && (
-        <Text style={[styles.text, { color: fg, fontSize: small ? 10 : 11.5 }]}>
+        <Text style={[styles.text, { color: fg, fontSize: small ? 10.5 : 12 }]}>
           {PRIORITY_LABEL[priority] || 'Medium'}
         </Text>
       )}
@@ -28,18 +28,16 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    borderRadius: 999,
+    gap: 4,
+    borderRadius: 8,
     alignSelf: 'flex-start',
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+  icon: {
+    fontWeight: '900',
   },
   text: {
-    fontWeight: '800',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
+    fontWeight: '700',
+    letterSpacing: 0.1,
   },
 });
+

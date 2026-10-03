@@ -39,7 +39,12 @@ export function Card({ children, style, padded = true }) {
     <View
       style={[
         styles.card,
-        { backgroundColor: colors.surface, borderColor: colors.border },
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          shadowColor: colors.shadow,
+          shadowOpacity: colors.mode === 'dark' ? 0.35 : 0.04,
+        },
         padded && styles.cardPadded,
         style,
       ]}
@@ -72,13 +77,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   subtitle: {
     fontSize: 13.5,
     lineHeight: 19,
+    fontWeight: '500',
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -86,16 +92,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 16.5,
     fontWeight: '800',
+    letterSpacing: -0.2,
   },
   sectionAction: {
     fontSize: 13,
     fontWeight: '700',
   },
   card: {
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardPadded: {
     padding: 16,

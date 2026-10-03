@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useTheme } from '../theme/ThemeContext';
 
@@ -17,13 +18,13 @@ export default function Fab({ onPress, label = 'Add task', bottom = 24, style })
           backgroundColor: colors.primary,
           bottom,
           transform: [{ scale: pressed ? 0.95 : 1 }],
-          shadowColor: colors.shadow,
-          opacity: pressed ? 0.9 : 1,
+          shadowColor: colors.primary,
+          opacity: pressed ? 0.92 : 1,
         },
         style,
       ]}
     >
-      <Text style={[styles.icon, { color: colors.primaryText }]}>＋</Text>
+      <Ionicons name="add" size={23} color={colors.primaryText} />
       {!!label && <Text style={[styles.label, { color: colors.primaryText }]}>{label}</Text>}
     </Pressable>
   );
@@ -35,22 +36,19 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     paddingHorizontal: 20,
-    height: 56,
-    borderRadius: 28,
-    shadowOpacity: 0.28,
-    shadowRadius: 12,
+    paddingVertical: 14,
+    height: 52,
+    borderRadius: 26,
+    shadowOpacity: 0.38,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 6 },
     elevation: 6,
-  },
-  icon: {
-    fontSize: 22,
-    fontWeight: '600',
-    lineHeight: 26,
   },
   label: {
     fontSize: 15,
     fontWeight: '800',
+    letterSpacing: -0.2,
   },
 });

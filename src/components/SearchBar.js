@@ -1,14 +1,26 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { useTheme } from '../theme/ThemeContext';
 
 export default function SearchBar({ value, onChangeText, placeholder = 'Search tasks', onClear, style }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
-    <View style={[styles.wrapper, { backgroundColor: colors.surface, borderColor: colors.border }, style]}>
-      <Text style={[styles.icon, { color: colors.textFaint }]}>🔍</Text>
+    <View
+      style={[
+        styles.wrapper,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          shadowColor: colors.shadow,
+          shadowOpacity: isDark ? 0.2 : 0.03,
+        },
+        style,
+      ]}
+    >
+      <Ionicons name="search" size={17} color={colors.textFaint} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -22,8 +34,8 @@ export default function SearchBar({ value, onChangeText, placeholder = 'Search t
         accessibilityLabel="Search tasks"
       />
       {value.length > 0 && (
-        <Pressable onPress={onClear} hitSlop={10} accessibilityRole="button" accessibilityLabel="Clear search">
-          <Text style={[styles.clear, { color: colors.textFaint }]}>✕</Text>
+        <Pressable onPress={onClear} hitSlop={12} accessibilityRole="button" accessibilityLabel="Clear search">
+          <Ionicons name="close-circle" size={18} color={colors.textFaint} />
         </Pressable>
       )}
     </View>
@@ -36,20 +48,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     paddingHorizontal: 14,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     minHeight: 48,
-  },
-  icon: {
-    fontSize: 15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 1,
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14.5,
     paddingVertical: 10,
-  },
-  clear: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '500',
   },
 });

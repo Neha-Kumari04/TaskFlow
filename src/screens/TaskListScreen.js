@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import EmptyState from '../components/EmptyState';
 import Fab from '../components/Fab';
@@ -159,11 +159,11 @@ export default function TaskListScreen({ navigation, route }) {
             ]}
           >
             <Ionicons name="options-outline" size={18} color={showFilters || activeCount > 0 ? colors.primaryText : colors.text} />
-            {activeCount > 0 && (
+            {activeCount > 0 ? (
               <View style={[styles.badge, { backgroundColor: colors.danger, borderColor: colors.surface }]}>
                 <Text style={styles.badgeText}>{activeCount}</Text>
               </View>
-            )}
+            ) : null}
           </Pressable>
         </View>
 
@@ -212,11 +212,11 @@ export default function TaskListScreen({ navigation, route }) {
               <Text style={[styles.sortSummary, { color: colors.textMuted }]} numberOfLines={1}>
                 {`Sorted by: ${sortLabel}`}
               </Text>
-              {activeCount > 0 && (
+              {activeCount > 0 ? (
                 <Pressable onPress={reset} accessibilityRole="button" hitSlop={8}>
                   <Text style={[styles.clearFilters, { color: colors.primary }]}>Clear filters</Text>
                 </Pressable>
-              )}
+              ) : null}
             </View>
           </View>
         )}
@@ -261,14 +261,14 @@ export default function TaskListScreen({ navigation, route }) {
         )}
       </ScrollView>
 
-      {!isLoading && filtered.length > 0 && (
+      {!isLoading && filtered.length > 0 ? (
         <View style={[styles.footerBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
           <Text style={[styles.footerText, { color: colors.textMuted }]}>
             {`Showing ${filtered.length} of ${counts.all} task${counts.all === 1 ? '' : 's'}`}
           </Text>
           <Text style={[styles.footerHint, { color: colors.textFaint }]}>Swipe a task for quick actions</Text>
         </View>
-      )}
+      ) : null}
 
       <Fab onPress={() => navigation.navigate('TaskForm', {})} label="Add task" />
       <SortSheet
@@ -321,6 +321,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
   },
   badge: {
     position: 'absolute',
@@ -344,6 +349,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 14,
     gap: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   filterGroup: {
     gap: 8,

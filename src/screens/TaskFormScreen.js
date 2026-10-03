@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import Button from '../components/Button';
@@ -92,7 +92,6 @@ export default function TaskFormScreen({ navigation, route }) {
     setPicker({ field, value: base });
   };
 
-  // The inline picker sits near the bottom of the form, so bring it into view.
   const scrollToPicker = (y) => {
     if (scrolledToPicker.current) return;
     scrolledToPicker.current = true;
@@ -204,6 +203,10 @@ export default function TaskFormScreen({ navigation, route }) {
         )}
 
         <Card style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="document-text-outline" size={17} color={colors.primary} />
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Task overview</Text>
+          </View>
           <FormField
             label="Title"
             required
@@ -229,6 +232,10 @@ export default function TaskFormScreen({ navigation, route }) {
         </Card>
 
         <Card style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="options-outline" size={17} color={colors.primary} />
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Priority & status</Text>
+          </View>
           <OptionPicker
             label="Priority"
             options={PRIORITY_OPTIONS}
@@ -248,8 +255,12 @@ export default function TaskFormScreen({ navigation, route }) {
         </Card>
 
         <Card style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="pricetag-outline" size={17} color={colors.primary} />
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Category</Text>
+          </View>
           <FormField
-            label="Category"
+            label="Category name"
             required
             value={category}
             onChangeText={(value) => {
@@ -277,6 +288,10 @@ export default function TaskFormScreen({ navigation, route }) {
         </Card>
 
         <Card style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="calendar-outline" size={17} color={colors.primary} />
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Schedule</Text>
+          </View>
           <DateField
             label="Start date"
             value={startDate}
@@ -327,7 +342,7 @@ export default function TaskFormScreen({ navigation, route }) {
             </View>
           </View>
 
-          {!!startDate && !!dueDate && dueDate >= startDate && (
+          {Boolean(startDate && dueDate && dueDate >= startDate) && (
             <View style={[styles.hint, { backgroundColor: colors.successSoft }]}>
               <Ionicons name="checkmark-circle" size={15} color={colors.success} />
               <Text style={[styles.hintText, { color: colors.success }]}>
@@ -337,9 +352,7 @@ export default function TaskFormScreen({ navigation, route }) {
           )}
         </Card>
 
-        {/* iOS renders the date picker inline, so it has to live inside the
-            ScrollView - as a sibling it collapses to zero height and stays
-            off screen. Android uses the native dialog and is rendered below. */}
+        {/* iOS inline date picker */}
         {isIOS && !!picker && (
           <View onLayout={(e) => scrollToPicker(e.nativeEvent.layout.y)}>
             <Card style={styles.card}>
@@ -369,10 +382,15 @@ export default function TaskFormScreen({ navigation, route }) {
             onPress={handleSave}
             loading={saving}
             size="large"
-            icon={isEditing ? '✓' : '＋'}
+            icon={<Ionicons name={isEditing ? 'checkmark-circle' : 'add-circle'} size={19} color="#FFFFFF" />}
           />
           {isEditing && (
-            <Button title="Delete task" onPress={handleDelete} variant="danger" icon="🗑" />
+            <Button
+              title="Delete task"
+              onPress={handleDelete}
+              variant="danger"
+              icon={<Ionicons name="trash-outline" size={17} color="#FFFFFF" />}
+            />
           )}
           <Button title="Cancel" onPress={() => navigation.goBack()} variant="ghost" />
         </View>
@@ -403,6 +421,17 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: 16,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: -4,
+  },
+  cardTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
   metaCard: {
     flexDirection: 'row',
