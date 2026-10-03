@@ -11,6 +11,7 @@ import StatCard from '../components/StatCard';
 import TaskItem from '../components/TaskItem';
 import { useTheme } from '../theme/ThemeContext';
 import { useTasks } from '../context/TaskContext';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { PRIORITY_WEIGHT } from '../utils/constants';
 import { daysBetween, formatDate, isTodayTask, todayISO } from '../utils/date';
 
@@ -59,6 +60,19 @@ function QuickAction({ icon, label, description, onPress, color }) {
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
   const { tasks, stats, isLoading, toggleTaskStatus, deleteTask } = useTasks();
+  const { confirm, dialog } = useConfirmDialog();
+
+  const confirmDelete = (id) => {
+    const task = tasks.find((item) => item.id === id);
+    confirm({
+      title: 'Delete task',
+      message: `Are you sure you want to delete "${task?.title ?? 'this task'}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      destructive: true,
+      onConfirm: () => deleteTask(id),
+    });
+  };
 
   const todaysTasks = useMemo(() => {
     return tasks
@@ -166,6 +180,8 @@ export default function HomeScreen({ navigation }) {
             label="Today's"
             value={stats.today}
             icon="sunny-outline"
+            filter="today"
+            onPress={() => navigation.navigate('Tasks', { dueFilter: 'today' })}
             hint={stats.overdue > 0 ? `${stats.overdue} overdue` : undefined}
           />
         </View>
@@ -194,7 +210,7 @@ export default function HomeScreen({ navigation }) {
               task={task}
               onPress={() => navigation.navigate('TaskDetail', { id: task.id })}
               onToggle={toggleTaskStatus}
-              onDelete={deleteTask}
+              onDelete={confirmDelete}
             />
           ))
         )}
@@ -265,6 +281,7 @@ export default function HomeScreen({ navigation }) {
       </ScrollView>
 
       <Fab onPress={() => navigation.navigate('TaskForm', {})} />
+      {dialog}
     </View>
   );
 }

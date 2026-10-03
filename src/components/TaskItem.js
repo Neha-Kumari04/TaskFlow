@@ -146,8 +146,8 @@ export default function TaskItem({ task, onPress, onToggle, onDelete }) {
       <TaskCard
         task={task}
         onPress={onPress}
-        onToggle={onToggle}
-        onDelete={onDelete}
+        onToggle={handleToggle}
+        onDelete={handleDelete}
         overdue={overdueDays}
       />
     </ReanimatedSwipeable>

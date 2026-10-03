@@ -76,13 +76,13 @@ export default function RootNavigator() {
       <Stack.Screen
         name="TaskDetail"
         component={TaskDetailScreen}
-        options={({ navigation }) => ({
+        options={({ navigation, route }) => ({
           title: 'Task details',
           headerBackTitle: 'Back',
           headerRight: () => (
             <Text
               onPress={() => {
-                const id = navigation.getState().routes.slice(-1)[0]?.params?.id;
+                const id = route.params?.id;
                 if (id) navigation.navigate('TaskForm', { id });
               }}
               style={[styles.headerAction, { color: colors.primary }]}

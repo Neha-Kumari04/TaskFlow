@@ -43,7 +43,17 @@ async function readTextFile(uri) {
     if (!response.ok) throw new Error(`Unexpected status ${response.status}`);
     return response.text();
   }
-  return new File(uri).text();
+  try {
+    return await new File(uri).text();
+  } catch {
+    try {
+      const { readAsStringAsync } = await import('expo-file-system/legacy');
+      return await readAsStringAsync(uri);
+    } catch {
+      const response = await fetch(uri);
+      return await response.text();
+    }
+  }
 }
 
 export async function pickCsvFile() {

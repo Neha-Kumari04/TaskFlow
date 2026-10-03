@@ -76,14 +76,19 @@ export default function TaskListScreen({ navigation, route }) {
   const [showFilters, setShowFilters] = useState(false);
 
   const routeFilter = route?.params?.statusFilter;
+  const routeDueFilter = route?.params?.dueFilter;
 
   useLayoutEffect(() => {
     if (routeFilter) {
       update({ status: routeFilter });
       navigation.setParams({ statusFilter: undefined });
     }
+    if (routeDueFilter) {
+      update({ dueFilter: routeDueFilter });
+      navigation.setParams({ dueFilter: undefined });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeFilter]);
+  }, [routeFilter, routeDueFilter]);
 
   const sortLabel = useMemo(
     () => SORT_OPTIONS.find((option) => option.key === filters.sortBy)?.label || 'Sort',

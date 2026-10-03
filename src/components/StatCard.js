@@ -8,12 +8,14 @@ const ICON_BY_FILTER = {
   all: 'layers-outline',
   pending: 'time-outline',
   completed: 'checkmark-done-outline',
+  today: 'sunny-outline',
 };
 
 const COLOR_BY_FILTER = {
   all: 'primary',
   pending: 'warning',
   completed: 'success',
+  today: 'info',
 };
 
 export default function StatCard({ label, value, icon, filter, onPress, hint }) {
